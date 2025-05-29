@@ -40,6 +40,7 @@ class _HomepageState extends State<Homepage> {
   ];
 
   int _selectedIndex = 0;
+  GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
   static final List<Widget> _screens = <Widget>[
     FeedScreen(),
@@ -59,6 +60,7 @@ class _HomepageState extends State<Homepage> {
   Widget build(BuildContext context) {
     size ??= MediaQuery.of(context).size;
     return Scaffold(
+      key: _key,
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
@@ -103,12 +105,15 @@ class _HomepageState extends State<Homepage> {
       //   action: SnackBarAction(
       //       label: 'Ok',
       //       onPressed: (){
-      //         ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      //         ScaffoldMessenger.of(_key.currentContext).hideCurrentSnackBar();
+      //          _key.currentState.hideCurrentSnackBar();
       //         AppSettings.openAppSettings();
       //       }
       //   ),
       // );
-      // ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      // ScaffoldMessenger.of(_key.currentContext).showSnackBar(snackBar);
+      //  _key.currentState.hideCurrentSnackBar();
+
     // }
   }
 

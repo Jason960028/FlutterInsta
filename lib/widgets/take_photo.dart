@@ -1,69 +1,95 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:insta_clone/models/camera_state.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
-// screen_size.dart import는 현재 코드에서는 사용되지 않습니다.
-// import '../constants/screen_size.dart';
+import '../constants/screen_size.dart';
+import 'my_progress_indicator.dart';
 
-class TakePhoto extends StatelessWidget {
-  final int currentIndex; // <--- CameraScreen으로부터 받을 현재 인덱스
+class TakePhoto extends StatefulWidget {
+  @override
+  State<TakePhoto> createState() => _TakePhotoState();
+}
 
-  const TakePhoto({
-    super.key,
-    required this.currentIndex, // <--- 필수 인자로 변경
-  });
+class _TakePhotoState extends State<TakePhoto> {
+
+  Widget get _myProgressIndicator {
+    final double progressContainerSize = size?.width ?? 100.0;
+    return MyProgressIndicator(containerSize: progressContainerSize);
+  }
+
 
   @override
   Widget build(BuildContext context) {
-    return Stack( // <--- Stack을 사용하여 위젯을 겹침
-      children: <Widget>[
-        // 1. 카메라 미리보기 영역 (배경)
-        Container(
-          color: Colors.black,
-          // 여기에 실제 카메라 프리뷰 위젯이 들어가야 합니다 (예: camera 패키지 사용)
-        ),
-
-        // 2. 촬영 버튼 (상단)
-        _buildTakePhotoButton(), // <--- 버튼 생성 함수 호출
-      ],
-    );
-  }
-
-  // 촬영 버튼을 생성하는 위젯 함수
-  Widget _buildTakePhotoButton() {
-    return Align(
-      alignment: Alignment.bottomCenter, // 하단 중앙에 배치
-      child: Padding(
-        padding: const EdgeInsets.only(bottom: 25.0), // 하단 여백 추가
-        child: Visibility(
-          visible: currentIndex == 1, // <--- 전달받은 currentIndex 사용
-          child: GestureDetector(
-            onTap: () {
-              print('사진 촬영 버튼 클릭! (from TakePhoto)');
-            },
-            child: Container(
-              width: 70.0,
-              height: 70.0,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.transparent,
-                border: Border.all(
-                  color: Colors.white,
-                  width: 5.0,
-                ),
+    return Consumer<CameraState>(
+      builder: (BuildContext context, CameraState cameraState, Widget? child) {
+        return Column(
+          children: [
+            Expanded( // 카메라 프리뷰 영역을 Expanded로 감쌉니다.
+              flex: 4, // 예시: 전체 수직 공간의 4/5를 차지하도록 설정 (비율은 조절 가능)
+              child: Container(
+                width: size?.width, // 사용 가능한 전체 너비를 사용
+                // 높이는 Expanded 위젯에 의해 결정됩니다.
+                color: Colors.black,
+                child: (cameraState.isReadyToTakePhoto)
+                // 수정: _getPreview의 첫 번째 인자를 context로 올바르게 전달
+                    ? _getPreview(cameraState)
+                    : _myProgressIndicator, // 카메라 준비 중일 때 프로그레스 인디케이터 표시
               ),
-              child: Center(
-                child: Container(
-                  width: 58.0,
-                  height: 58.0,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
+            ),
+            Expanded( // 버튼 영역
+              flex: 1, // 예시: 전체 수직 공간의 1/5를 차지하도록 설정
+              child: Center( // 버튼을 할당된 공간의 중앙에 배치
+                child: OutlinedButton(
+                  onPressed: () {
+                    if(cameraState.isReadyToTakePhoto){
+                      _attemptTakePhoto(cameraState);
+                    }
+                  },
+                  style: OutlinedButton.styleFrom(
+                    shape: const CircleBorder(),
+                    padding: const EdgeInsets.all(20.0), // 버튼 내부 여백 추가 (버튼 크기 및 터치 영역 확보)
+                    side: const BorderSide(color: Colors.black12, width: 2.0), // 테두리 두께 조정 (기존 20은 매우 큼)
                   ),
+                  child: const Icon(Icons.camera_alt, size: 30.0, color: Colors.grey),
                 ),
               ),
             ),
-          ),
-        ),
-      ),
+          ],
+        );
+      },
     );
+  }
+
+  Widget _getPreview(CameraState cameraState) {
+
+    return ClipRect(
+        child: OverflowBox(
+            alignment: Alignment.center,
+            child: FittedBox(
+              fit: BoxFit.fitWidth,
+              child: Container(
+                  width: size?.width,
+                  height: size!.width / cameraState.controller.value.aspectRatio,
+                  child: CameraPreview(cameraState.controller)
+              ),
+            )
+        )
+    );
+  }
+
+  void _attemptTakePhoto(CameraState cameraState) async{
+
+    final String timeInmilli = DateTime.now().millisecondsSinceEpoch.toString();
+    try{
+      final path = join((await getTemporaryDirectory()).path, '$timeInmilli.png');
+      await cameraState.controller.takePicture();//path
+    }catch(e){
+
+    }
+
+
   }
 }
