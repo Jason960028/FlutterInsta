@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:insta_clone/widgets/my_gallery.dart';
 import 'package:provider/provider.dart';
 // import 'package:insta_clone/screens/profile_screen.dart'; // 필요 없는 import일 수 있음
 
@@ -51,10 +52,7 @@ class _CameraScreenState extends State<CameraScreen> {
         body: PageView( // <--- PageView만 사용
           controller: _pageController,
           children: <Widget>[
-            Container(
-              color: Colors.grey[900],
-              child: Center(child: Text('Gallery Placeholder', style: TextStyle(color: Colors.white))),
-            ),
+            MyGallery(),
             TakePhoto(), // <--- _currentIndex 전달
             Container(
               color: Colors.grey[900],

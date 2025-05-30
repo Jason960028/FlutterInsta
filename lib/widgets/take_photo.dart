@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:insta_clone/models/camera_state.dart';
@@ -6,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/screen_size.dart';
+import '../screens/share_post_screen.dart';
 import 'my_progress_indicator.dart';
 
 class TakePhoto extends StatefulWidget {
@@ -45,7 +48,7 @@ class _TakePhotoState extends State<TakePhoto> {
                 child: OutlinedButton(
                   onPressed: () {
                     if(cameraState.isReadyToTakePhoto){
-                      _attemptTakePhoto(cameraState);
+                      _attemptTakePhoto(cameraState,context);
                     }
                   },
                   style: OutlinedButton.styleFrom(
@@ -80,14 +83,28 @@ class _TakePhotoState extends State<TakePhoto> {
     );
   }
 
-  void _attemptTakePhoto(CameraState cameraState) async{
+  void _attemptTakePhoto(CameraState cameraState, BuildContext context) async{
 
     final String timeInmilli = DateTime.now().millisecondsSinceEpoch.toString();
     try{
-      final path = join((await getTemporaryDirectory()).path, '$timeInmilli.png');
-      await cameraState.controller.takePicture();//path
-    }catch(e){
+      final XFile imageXFile = await cameraState.controller.takePicture();
 
+      File imageFile = File(imageXFile.path);
+
+      if (!mounted) return; // 현재 State가 위젯 트리에 아직 있는지 확인
+      Navigator.of(context).push(MaterialPageRoute(
+          builder: (_) => SharePostScreen(imageFile, )));
+      // final path = join((await getTemporaryDirectory()).path, '$timeInmilli.png');
+      // await cameraState.controller.takePicture(path);
+      //
+      // File imageFile = File(path);
+      // Navigator.of(context).push(MaterialPageRoute(builder: (_) => SharePostScreen(imageFile, key: key)));
+    }catch(e){
+      print("사진 촬영 중 오류 발생: $e");
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("사진 촬영에 실패했습니다: $e")),
+      );
     }
 
 
