@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:insta_clone/screens/camera_screen.dart';
 import 'package:insta_clone/screens/feed_screen.dart';
@@ -143,6 +145,10 @@ class _HomepageState extends State<Homepage> {
     Map<Permission, PermissionStatus> statuses = await [
       Permission.camera,
       Permission.microphone,
+      Platform.isIOS?
+      Permission.photos:
+      Permission.storage
+
     ].request();
     print("권한 요청 결과: $statuses"); // <--- 로그 추가
 

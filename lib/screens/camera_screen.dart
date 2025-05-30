@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:insta_clone/widgets/my_gallery.dart';
 import 'package:provider/provider.dart';
-// import 'package:insta_clone/screens/profile_screen.dart'; // 필요 없는 import일 수 있음
-
 import '../models/camera_state.dart';
+import '../models/gallery_state.dart'; // 수정된 GalleryState를 사용한다고 가정
 import '../widgets/take_photo.dart';
 
 class CameraScreen extends StatefulWidget {
 
   CameraState _cameraState = CameraState();
+  GalleryState _galleryState = GalleryState();
 
   @override
   State<CameraScreen> createState(){
     _cameraState.getReadyToTakePhoto();
+    _galleryState.loadImages();
     return _CameraScreenState();
   }
 }
@@ -41,6 +42,7 @@ class _CameraScreenState extends State<CameraScreen> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<CameraState>.value(value: widget._cameraState),
+        ChangeNotifierProvider<GalleryState>.value(value: widget._galleryState),
         //겹치지 않는 <type>의 provider을 제공 가능
       ],
       child: Scaffold(
