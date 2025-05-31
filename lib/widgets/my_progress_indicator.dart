@@ -19,7 +19,7 @@ class MyProgressIndicator extends StatelessWidget {
           child: SizedBox(
             height: progressSize,
             width: progressSize,
-            child: Image.asset('assets/images/loading.gif'),
+            child: CircularProgressIndicator(),
           )
       ),
     );

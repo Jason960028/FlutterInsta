@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:insta_clone/constants/common_size.dart';
+import 'package:provider/provider.dart';
 
 import '../home_page.dart';
+import '../models/firebase_auth_state.dart';
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
@@ -95,7 +97,8 @@ class _SignUpFormState extends State<SignUpForm> {
               TextButton.icon(
                 icon: Image.asset('assets/images/Facebook-logo.png', width: 40, height: 40,),
                 onPressed: (){
-
+                  Provider.of<FirebaseAuthState>(context, listen: false)
+                      .loginWithFacebook(context);
                 },
                 label: Text(
                   'Login with Facebook',
@@ -120,11 +123,8 @@ class _SignUpFormState extends State<SignUpForm> {
               onPressed: (){
                 if(_formKey.currentState!.validate()){
                   print('Validation success');
-                  Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                          builder: (context) => Homepage()
-                      )
-                  );
+                  Provider.of<FirebaseAuthState>(context, listen: false)
+                      .registerUser(email: _emailController.text, password: _passwordController.text);
                 }
               },
               child: Text (
